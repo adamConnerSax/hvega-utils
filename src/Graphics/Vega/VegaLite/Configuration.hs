@@ -12,6 +12,7 @@ module Graphics.Vega.VegaLite.Configuration
   , intYear
 --  , timeField
   , configuredVegaLite
+  , configuredVegaLiteSchema
   , viewConfigAsHvega
   , viewConfigAsTopLevel
     -- * Re-export
