@@ -4,7 +4,7 @@
 {-# LANGUAGE StandaloneDeriving    #-}
 module Graphics.Vega.VegaLite.Configuration
   (
-    -- * Helper Types    
+    -- * Helper Types
     TimeEncoding(..)
   , AxisBounds(..)
   , ViewConfig(..)
@@ -31,7 +31,7 @@ data ViewConfig = ViewConfig { vcWidth :: Double, vcHeight :: Double, vcPadding 
 
 viewConfigAsHvega :: ViewConfig -> GV.BuildConfigureSpecs
 viewConfigAsHvega (ViewConfig w h p) = GV.configuration
-  (GV.View
+  (GV.ViewStyle
     [ GV.ViewContinuousWidth w
     , GV.ViewContinuousHeight h
     , GV.ViewDiscreteWidth w
@@ -55,6 +55,17 @@ configuredVegaLite vc xs =
     $  viewConfigAsTopLevel vc
     <> [(GV.configure . viewConfigAsHvega vc) []]
     <> xs
+
+
+configuredVegaLiteSchema :: Text -> ViewConfig -> [(GV.VLProperty, GV.VLSpec)] -> GV.VegaLite
+--configuredVegaLite vc xs =
+--  GV.toVegaLite $ [(GV.configure . viewConfigAsHvega vc) []] <> xs
+configuredVegaLiteSchema sch vc xs =
+  GV.toVegaLiteSchema sch
+    $  viewConfigAsTopLevel vc
+    <> [(GV.configure . viewConfigAsHvega vc) []]
+    <> xs
+
 
 data TimeEncoding a = TimeEncoding { timeFormat :: Text, timeUnit :: Compat.BaseTimeUnitT, toDateTime:: a -> [GV.DateTime] }
 
