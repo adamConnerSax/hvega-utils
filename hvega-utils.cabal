@@ -41,10 +41,10 @@ library
     , histogram-fill >=0.8.0.0 && <0.10
     , hvega >=0.6.0.0 && < 0.12
     , map-reduce-folds >=0.1.0.3 && <0.2
-    , relude >=0.7.0 && < 0.8
+    , relude >=1.0.0 && < 1.1
     , statistics >=0.15.0 && <0.16
     , text >=1.1.0.1 && <1.3
-    , time >=1.8 && <=1.10
+    , time >=1.8 && <1.12
     , vector >=0.11.0.0 && <0.13
   mixins:  base hiding (Prelude)
          , relude (Relude as Prelude
