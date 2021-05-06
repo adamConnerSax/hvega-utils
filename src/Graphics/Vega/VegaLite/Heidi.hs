@@ -16,14 +16,14 @@ import Heidi (VP(..))
 -- This should be in Heidi ??
 type FRow k v r = Heidi.Row k (v -> r)
 
-intersectWithA:: (Applicative t, Heidi.TrieKey k) => (a -> b -> t r) -> Heidi.Row k a -> Heidi.Row k b -> t (Heidi.Row k r)
-intersectWithA f ra = Heidi.traverseWithKey (const id) . Heidi.intersectionWith f ra
+intersectionWithA:: (Applicative t, Heidi.TrieKey k) => (a -> b -> t r) -> Heidi.Row k a -> Heidi.Row k b -> t (Heidi.Row k r)
+intersectionWithA f ra = Heidi.traverseWithKey (const id) . Heidi.intersectionWith f ra
 
 applyFRow :: Heidi.TrieKey k => FRow k v r -> Heidi.Row k v -> Heidi.Row k r
 applyFRow = Heidi.intersectionWith ($)
 
 applyFRowA :: (Heidi.TrieKey k, Applicative t) => FRow k v (t r) -> Heidi.Row k v -> t (Heidi.Row k r)
-applyFRowA = intersectWithA ($)
+applyFRowA = intersectionWithA ($)
 -- end Heidi bits
 
 vpTodvNumber :: VP -> Either Text GV.DataValue
@@ -87,9 +87,11 @@ asBool' ns = hvegaF ns vpTodvBool
 asBool :: Text -> ([Heidi.TC], VP -> Either Text GV.DataValue)
 asBool n = asBool' [n]
 
+-- this will require a type-application to specify @a
 asEnum' :: forall a. (Enum a, Show a) => [Text] -> ([Heidi.TC], VP -> Either Text GV.DataValue)
 asEnum' ns = hvegaF ns (vpTodvEnum @a)
 
+-- this will require a type-application to specify @a
 asEnum :: forall a. (Enum a, Show a) => Text -> ([Heidi.TC], VP -> Either Text GV.DataValue)
 asEnum n = asEnum' @a [n]
 
