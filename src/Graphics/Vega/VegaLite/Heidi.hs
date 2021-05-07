@@ -56,7 +56,8 @@ vpTodvStr = \case
   VPUnit -> Right $ GV.Str "()" -- ICK
   _ -> Left "Not a Text/String type in vpTodvStr"
 
--- this will require a type-application to specify @a
+-- this will require a type-application to specify @a@
+-- should we also require @Bounded@ and check that we are in bounds?
 vpTodvEnum :: forall a.(Enum a, Show a) => VP -> Either Text GV.DataValue
 vpTodvEnum = \case
   VPOH oh -> Right $ GV.Str $ show $ toEnum @a $ Heidi.onehotIx oh
@@ -87,11 +88,11 @@ asBool' ns = hvegaF ns vpTodvBool
 asBool :: Text -> ([Heidi.TC], VP -> Either Text GV.DataValue)
 asBool n = asBool' [n]
 
--- this will require a type-application to specify @a
+-- this will require a type-application to specify @a@
 asEnum' :: forall a. (Enum a, Show a) => [Text] -> ([Heidi.TC], VP -> Either Text GV.DataValue)
 asEnum' ns = hvegaF ns (vpTodvEnum @a)
 
--- this will require a type-application to specify @a
+-- this will require a type-application to specify @a@
 asEnum :: forall a. (Enum a, Show a) => Text -> ([Heidi.TC], VP -> Either Text GV.DataValue)
 asEnum n = asEnum' @a [n]
 
