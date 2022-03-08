@@ -40,7 +40,7 @@ library
     , foldl >=1.4.0 && <1.5
     , heidi > 0.1 && < 0.2
     , histogram-fill >=0.8.0.0 && <0.10
-    , hvega >=0.6.0.0 && < 0.12
+    , hvega >=0.6.0.0 && < 0.13
     , map-reduce-folds >=0.1.0.3 && <0.2
     , relude >=1.0.0 && < 1.1
     , scientific >= 0.3.6 && < 0.4
