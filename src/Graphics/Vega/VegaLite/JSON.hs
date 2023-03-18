@@ -2,7 +2,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Graphics.Vega.VegaLite.JSON
   (
-    module Graphics.Vega.VegaLite.JSON
+    rowsToJSON
+  ,
   )
 where
 
@@ -13,6 +14,8 @@ import qualified Data.Aeson.Types as AT
 import qualified Data.Text as T
 import qualified Control.Foldl as FL
 import qualified Graphics.Vega.VegaLite        as GV
+
+
 
 rowsToJSON :: (row -> [(GV.FieldName, GV.DataValue)]) -> [GV.Format] -> Maybe Text -> FL.Fold row A.Value
 rowsToJSON rowToGVFields gvFormat jsonKeyM = FL.premap rowToGVFields $ FL.Fold step begin end where
