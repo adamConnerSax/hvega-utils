@@ -3,6 +3,7 @@
 module Graphics.Vega.VegaLite.JSON
   (
     rowsToJSON
+  , rowsToJSONM
   )
 where
 
