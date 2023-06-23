@@ -14,9 +14,25 @@ import qualified Data.Aeson.Types as AT
 import qualified Data.Text as T
 import qualified Control.Foldl as FL
 import qualified Graphics.Vega.VegaLite        as GV
+import Data.Functor.Identity (Identity)
 
 
+rowsToJSON' :: Foldable g => (row -> g [(GV.FieldName, GV.DataValue)]) -> [GV.Format] -> Maybe Text -> FL.Fold row A.Value
+rowsToJSON' rowToGVFields gvFormat jsonKeyM = FL.premap rowToGVFields $ FL.Fold step begin end where
+  jsonKey = fromMaybe "values" jsonKeyM
+  step dataRowList gvFields' = foldl' (\rows gvFields -> GV.dataRow gvFields rows) dataRowList gvFields'
+  begin = []
+  end dataRowList = A.object
+                    $ (AK.fromText jsonKey, A.toJSON dataRowList )
+                    : if null gvFormat
+                      then []
+                      else [(AK.fromText "format", A.object (concatMap formatProperty gvFormat))]
 
+
+rowsToJSON :: (row -> [(GV.FieldName, GV.DataValue)]) -> [GV.Format] -> Maybe Text -> FL.Fold row A.Value
+rowsToJSON f = rowsToJSON' (Identity . f)
+
+{-
 rowsToJSON :: (row -> [(GV.FieldName, GV.DataValue)]) -> [GV.Format] -> Maybe Text -> FL.Fold row A.Value
 rowsToJSON rowToGVFields gvFormat jsonKeyM = FL.premap rowToGVFields $ FL.Fold step begin end where
   jsonKey = fromMaybe "values" jsonKeyM
@@ -27,7 +43,25 @@ rowsToJSON rowToGVFields gvFormat jsonKeyM = FL.premap rowToGVFields $ FL.Fold s
                     : if null gvFormat
                       then []
                       else [(AK.fromText "format", A.object (concatMap formatProperty gvFormat))]
+-}
 
+rowsToJSONM' :: (Monad m, Foldable g) => (row -> m (g [(GV.FieldName, GV.DataValue)])) -> [GV.Format] -> Maybe Text -> FL.FoldM m row A.Value
+rowsToJSONM' rowToGVFieldsM gvFormat jsonKeyM = FL.premapM rowToGVFieldsM $ FL.FoldM step begin end where
+  jsonKey = fromMaybe "values" jsonKeyM
+  step dataRowList gvFields' = pure $ foldl' (\rows gvFields -> GV.dataRow gvFields rows) dataRowList gvFields'
+  begin = pure []
+  end dataRowList = pure
+                    $ A.object
+                    $ (AK.fromText jsonKey, A.toJSON dataRowList )
+                    : if null gvFormat
+                      then []
+                      else [(AK.fromText "format", A.object (concatMap formatProperty gvFormat))]
+
+
+rowsToJSONM :: Monad m => (row -> m [(GV.FieldName, GV.DataValue)]) -> [GV.Format] -> Maybe Text -> FL.FoldM m row A.Value
+rowsToJSONM f = rowsToJSONM' (fmap Identity . f)
+
+{-
 rowsToJSONM :: Monad m => (row -> m [(GV.FieldName, GV.DataValue)]) -> [GV.Format] -> Maybe Text -> FL.FoldM m row A.Value
 rowsToJSONM rowToGVFieldsM gvFormat jsonKeyM = FL.premapM rowToGVFieldsM $ FL.FoldM step begin end where
   jsonKey = fromMaybe "values" jsonKeyM
@@ -39,7 +73,7 @@ rowsToJSONM rowToGVFieldsM gvFormat jsonKeyM = FL.premapM rowToGVFieldsM $ FL.Fo
                     : if null gvFormat
                       then []
                       else [(AK.fromText "format", A.object (concatMap formatProperty gvFormat))]
-
+-}
 
 
 formatProperty :: GV.Format -> [AT.Pair]
