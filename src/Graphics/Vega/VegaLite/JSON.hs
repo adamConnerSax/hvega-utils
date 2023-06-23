@@ -3,7 +3,9 @@
 module Graphics.Vega.VegaLite.JSON
   (
     rowsToJSON
+  , rowsToJSON'
   , rowsToJSONM
+  , rowsToJSONM'
   )
 where
 
