@@ -36,6 +36,7 @@ import qualified Graphics.Vega.VegaLite.Compat as VegaCompat
 import Graphics.Vega.VegaLite.Configuration
   ( AxisBounds (..),
     ViewConfig (..),
+    Width(..),
     configuredVegaLite,
   )
 
@@ -54,10 +55,13 @@ singleHistogram :: (Foldable f, Real a)
   -> ViewConfig
   -> f row
   -> GV.VegaLite
-singleHistogram title xLabelM yLabelM getVal nBins xBounds addOutOfRange vc@(ViewConfig width _ _) rows =
+singleHistogram title xLabelM yLabelM getVal nBins xBounds addOutOfRange vc rows =
   let yLabel = fromMaybe "count" yLabelM
       xLabel = fromMaybe "" xLabelM
-      bandSize = (width / realToFrac nBins) - 10.0
+      bandSize = case vcWidth vc of
+        WidthContainer x -> (x / realToFrac nBins) - 10.0
+        WidthFixed x -> (x / realToFrac nBins) - 10.0
+        WidthStep x _ -> x
       vecX =
         FL.fold
           (FL.premap (realToFrac . getVal) (FL.vector @VU.Vector))
@@ -107,7 +111,7 @@ multiHistogram ::
   -> ViewConfig
   -> f row
   -> GV.VegaLite
-multiHistogram title xLabelM yLabelM catLabelM  getVal getCat dvCat nBins xBounds addOutOfRange mhStyle vc@(ViewConfig width _ _) rows =
+multiHistogram title xLabelM yLabelM catLabelM  getVal getCat dvCat nBins xBounds addOutOfRange mhStyle vc rows =
   let yLabel = fromMaybe "count" yLabelM
       xLabel = fromMaybe "X" xLabelM
       catLabel = fromMaybe "Category" catLabelM
@@ -154,7 +158,10 @@ multiHistogram title xLabelM yLabelM catLabelM  getVal getCat dvCat nBins xBound
       (hEnc, hBar) = case mhStyle of
         StackedBar ->
           let encX = GV.position GV.X [GV.PName xLabel, GV.PmType GV.Quantitative]
-              bandSize = (realToFrac width / realToFrac nBins) - 2
+              bandSize =  case vcWidth vc of
+                WidthContainer x -> (x / realToFrac nBins) - 2
+                WidthFixed x -> (x / realToFrac nBins) - 2
+                WidthStep x _ -> x
               hBar' = GV.mark GV.Bar [GV.MBinSpacing 1, GV.MSize bandSize]
            in (encX . encY . encC, hBar')
         FacetedBar ->

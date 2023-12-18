@@ -8,8 +8,12 @@ module Graphics.Vega.VegaLite.Configuration
     TimeEncoding(..)
   , AxisBounds(..)
   , ViewConfig(..)
+  , Width(..)
+  , Height(..)
     -- * helpers
   , intYear
+  , sizeOfContainerVC
+  , fixedSizeVC
 --  , timeField
   , configuredVegaLite
   , configuredVegaLiteSchema
@@ -28,22 +32,50 @@ data AxisBounds a where
   DataMinMax ::AxisBounds a
   GivenMinMax ::a -> a -> AxisBounds a deriving (Eq, Show)
 
-data ViewConfig = ViewConfig { vcWidth :: Double, vcHeight :: Double, vcPadding :: Double }
+
+-- even if set to container, we need a default
+data Width = WidthContainer Double | WidthStep Double Double | WidthFixed Double deriving (Show)
+defaultWidth :: Width -> Double
+defaultWidth (WidthContainer x) = x
+defaultWidth (WidthStep _ x) = x
+defaultWidth (WidthFixed x) = x
+
+data Height = HeightContainer Double | HeightFixed Double deriving (Show)
+defaultHeight :: Height -> Double
+defaultHeight (HeightContainer x) = x
+defaultHeight (HeightFixed x) = x
+
+topLevelViewWidth :: Width -> GV.PropertySpec
+topLevelViewWidth (WidthContainer _) = GV.widthOfContainer
+topLevelViewWidth (WidthStep x _) = GV.widthStep x
+topLevelViewWidth (WidthFixed x) = GV.width x
+
+topLevelViewHeight :: Height -> GV.PropertySpec
+topLevelViewHeight (HeightContainer _) = GV.heightOfContainer
+topLevelViewHeight (HeightFixed x) = GV.height x
+
+data ViewConfig = ViewConfig { vcWidth :: Width, vcHeight :: Height, vcPadding :: Double }
+
+sizeOfContainerVC :: Double -> Double -> Double -> ViewConfig
+sizeOfContainerVC w h p = ViewConfig (WidthContainer w) (HeightContainer h) p
+
+fixedSizeVC :: Double -> Double -> Double -> ViewConfig
+fixedSizeVC w h p = ViewConfig (WidthFixed w) (HeightFixed h) p
+
 
 viewConfigAsHvega :: ViewConfig -> GV.BuildConfigureSpecs
 viewConfigAsHvega (ViewConfig w h p) = GV.configuration
   (GV.ViewStyle
-    [ GV.ViewContinuousWidth w
-    , GV.ViewContinuousHeight h
-    , GV.ViewDiscreteWidth w
-    , GV.ViewDiscreteHeight h
+    [ GV.ViewContinuousWidth $ defaultWidth w
+    , GV.ViewContinuousHeight $ defaultHeight h
+    , GV.ViewDiscreteWidth $ defaultWidth w
+    , GV.ViewDiscreteHeight $ defaultHeight h
     ]
   )
-
 viewConfigAsTopLevel :: ViewConfig -> [(GV.VLProperty, GV.VLSpec)]
 viewConfigAsTopLevel (ViewConfig w h p) =
-  [ GV.width w
-  , GV.height h
+  [ topLevelViewWidth w
+  , topLevelViewHeight h
   , GV.padding (GV.PSize p)
   , GV.autosize [GV.APad, GV.APadding, GV.AResize]
   ]
