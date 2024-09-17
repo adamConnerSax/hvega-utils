@@ -1,11 +1,13 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TupleSections #-}
 module Graphics.Vega.VegaLite.JSON
   (
     rowsToJSON
   , rowsToJSON'
   , rowsToJSONM
   , rowsToJSONM'
+  , mergeJSONRows
   )
 where
 
@@ -16,6 +18,7 @@ import qualified Data.Aeson.Types as AT
 import qualified Data.Text as T
 import qualified Control.Foldl as FL
 import qualified Graphics.Vega.VegaLite        as GV
+import qualified Data.Vector as V
 import Data.Functor.Identity (Identity)
 
 
@@ -33,6 +36,26 @@ rowsToJSON' rowToGVFields gvFormat jsonKeyM = FL.premap rowToGVFields $ FL.Fold 
 
 rowsToJSON :: (row -> [(GV.FieldName, GV.DataValue)]) -> [GV.Format] -> Maybe Text -> FL.Fold row A.Value
 rowsToJSON f = rowsToJSON' (Identity . f)
+
+getRows :: Text -> A.Value -> Maybe (V.Vector A.Value)
+getRows k = \case
+  A.Object km -> case AKM.lookup (AK.fromText k) km of
+    Just (A.Array a) -> pure a
+    _ -> Nothing
+  _ -> Nothing
+
+getFmt :: A.Value -> Maybe A.Value
+getFmt = \case
+  A.Object km -> AKM.lookup (AK.fromText "format") km
+  _ -> Nothing
+
+
+mergeJSONRows :: Maybe Text -> A.Value -> A.Value -> Maybe A.Value
+mergeJSONRows mKey aVal bVal = do
+  let key = fromMaybe "values" mKey
+  aVec <- getRows key aVal
+  bVec <- getRows key bVal
+  pure $ A.object $ [(AK.fromText key, (A.Array $ V.concat [aVec, bVec]))] <> maybe [] (pure . (AK.fromText "format",)) (getFmt aVal)
 
 {-
 rowsToJSON :: (row -> [(GV.FieldName, GV.DataValue)]) -> [GV.Format] -> Maybe Text -> FL.Fold row A.Value
