@@ -7,12 +7,12 @@ allow-newer: base, hashable, cereal-time:time, pandoc:random, relude, ghc-prim, 
 source-repository-package
   type: git
   location: https://github.com/adamConnerSax/heidi
-  tag: 83e0f7e6ba80baaa18ab7daafe7083828fc74d60
+  tag: 11bf52bd5563437582f1402a7e37e68181b68731
 
 source-repository-package
   type: git
   location: https://github.com/adamConnerSax/map-reduce-folds
-  tag: 997109a05bdeada4d41d3112c274d67c4cb94bca
+  tag: f7f7cb139850bcfe306175a19cf41cf7e89d2f3b
 
 
 --source-repository-package

@@ -37,7 +37,7 @@ library
       aeson >= 2.1 && < 2.3
     , array >=0.4.0.1 && <=0.6
     , base >=4.7 && <5
-    , containers >=0.5.0.0 && <=0.7
+    , containers >=0.5.0.0 && <=0.9
     , foldl >=1.4.0 && <1.5
     , heidi >= 0.1 && < 0.4
     , histogram-fill >=0.8.0.0 && <0.10
@@ -47,7 +47,7 @@ library
     , scientific >= 0.3.6 && < 0.4
     , statistics >=0.15.0 && <0.17
     , text >=2 && <2.2
-    , time >=1.8 && <1.14
+    , time >=1.8 && <1.16
     , vector >=0.11.0.0 && <0.14
   mixins:  base hiding (Prelude)
          , relude (Relude as Prelude
